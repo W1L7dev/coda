@@ -1,69 +1,64 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { faDesktop, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { createClient } from "@/lib/supabase/client";
+import translations from "./translations.json";
+
+type Theme = "light" | "system" | "dark";
+type Language = "en" | "fr";
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>("system");
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  const cycleTheme = () => setTheme((current) => current === "system" ? "dark" : current === "dark" ? "light" : "system");
+  const themeIcon = theme === "dark" ? faMoon : theme === "light" ? faSun : faDesktop;
+
+  return <button className="theme-toggle" onClick={cycleTheme} aria-label={`Switch theme, currently ${theme}`} title={`Theme: ${theme}`}>
+    <FontAwesomeIcon className="theme-symbol" icon={themeIcon} aria-hidden="true" />
+  </button>;
+}
 
 export default function Home() {
+  const [language, setLanguage] = useState<Language>("en");
+  const copy = translations[language];
+  const router = useRouter();
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace("/dashboard");
+    });
+  }, [router]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="site-shell">
+      <header className="site-header">
+        <a className="wordmark" href="#top" aria-label="Coda home">coda<span className="wordmark-dot">.</span></a>
+        <nav className="desktop-nav" aria-label={language === "fr" ? "Navigation principale" : "Main navigation"}>
+          <a href="#about">{copy.nav[0]}</a><a href="#features">{copy.nav[1]}</a>
+          <span className="language-switcher"><button className={language === "fr" ? "active-language" : ""} onClick={() => setLanguage("fr")}>FR</button><span>/</span><button className={language === "en" ? "active-language" : ""} onClick={() => setLanguage("en")}>EN</button></span>
+        </nav>
+        <div className="header-actions"><ThemeToggle /><a className="text-link" href="/login">{copy.login}</a><a className="button button-small button-dark" href="/signup">{copy.getStarted} <span aria-hidden="true">↗</span></a></div>
+      </header>
+
+      <main id="top">
+        <section className="hero section-wrap"><div className="hero-copy"><p className="eyebrow"><span className="eyebrow-line" /> {copy.eyebrow}</p><h1>{copy.heroTitle[0]}<em>{copy.heroTitle[1]}</em></h1><p className="hero-intro">{copy.heroIntro}</p><div className="hero-actions"><a className="button button-accent" href="/signup">{copy.findRhythm} <span aria-hidden="true">↗</span></a><a className="quiet-link" href="#about">{copy.discover} <span aria-hidden="true">↓</span></a></div></div></section>
+        <section className="about section-wrap" id="about"><p className="section-label">{copy.aboutLabel} <span>01 / 03</span></p><div className="about-grid"><h2>{copy.aboutTitle[0]}<em>{copy.aboutTitle[1]}</em>{copy.aboutTitle[2]}</h2><div className="about-copy"><p>{copy.aboutCopy}</p></div></div></section>
+        <section className="features section-wrap" id="features"><div className="features-heading"><p className="section-label">{copy.featuresLabel} <span>02 / 03</span></p><h2>{copy.featuresTitle[0]}<em>{copy.featuresTitle[1]}</em></h2></div><div className="feature-list">{copy.features.map(([number, title, description]) => <article className="feature-item" key={number}><span className="feature-number">{number}</span><h3>{title}</h3><p>{description}</p><span className="feature-arrow" aria-hidden="true">↗</span></article>)}</div></section>
+        <section className="cta section-wrap" id="get-started"><div className="cta-inner"><p className="eyebrow"><span className="eyebrow-line" /> {copy.ctaEyebrow}</p><h2>{copy.ctaTitle[0]}<em>{copy.ctaTitle[1]}</em>{copy.ctaTitle[2]}</h2><p>{copy.ctaCopy}</p><a className="button button-light" href="/signup">{copy.getStarted} <span aria-hidden="true">↗</span></a></div><div className="cta-mark" aria-hidden="true">coda<span>.</span></div></section>
       </main>
+
+      <footer className="site-footer" id="journal"><div className="footer-top"><a className="wordmark" href="#top">coda<span className="wordmark-dot">.</span></a><p>{copy.footerCopy}</p></div><div className="footer-bottom"><span>© 2026 William Miclette</span><div><a href="#about">{copy.nav[0]}</a><a href="#features">{copy.nav[1]}</a><a href="mailto:hello@coda.music">{copy.contact}</a></div><span>{copy.madeFor}</span></div></footer>
     </div>
   );
 }

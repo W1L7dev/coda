@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) project for Coda, a workspace for classical musicians.
 
 ## Getting Started
 
@@ -16,9 +16,17 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Supabase setup
+
+1. Copy `.env.example` to `.env.local` and add the project URL and publishable key from Supabase.
+2. Run `supabase/001_profiles.sql` in the Supabase SQL Editor. It creates the protected `profiles` table and creates a profile automatically when a user signs up.
+3. In Supabase Authentication settings, configure the site URL as `http://localhost:3000` for local development and enable email/password authentication.
+
+The `/login` and `/signup` forms use Supabase Auth. New account names are stored in `auth.users` metadata and copied into `public.profiles` by the database trigger.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to optimize and load Manrope.
 
 ## Learn More
 
