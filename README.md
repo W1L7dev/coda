@@ -20,7 +20,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 1. Copy `.env.example` to `.env.local` and add the project URL and publishable key from Supabase.
 2. Run `supabase/001_profiles.sql` in the Supabase SQL Editor. It creates the protected `profiles` table and creates a profile automatically when a user signs up.
-3. In Supabase Authentication settings, configure the site URL as `http://localhost:3000` for local development and enable email/password authentication.
+3. Run the remaining numbered SQL files in `supabase/` in order, including `supabase/012_secondary_color.sql`, so profile preferences can be saved.
+4. In Supabase Authentication settings, configure the site URL as `http://localhost:3000` for local development and enable email/password authentication.
 
 The `/login` and `/signup` forms use Supabase Auth. New account names are stored in `auth.users` metadata and copied into `public.profiles` by the database trigger.
 

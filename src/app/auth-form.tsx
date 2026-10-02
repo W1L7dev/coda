@@ -1,24 +1,18 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { faArrowLeft, faDesktop, faEye, faEyeSlash, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { createClient } from "@/lib/supabase/client";
+import { useApp } from "@/lib/app-context";
 import translations from "./translations.json";
 
-type Theme = "light" | "system" | "dark";
-type Language = "en" | "fr";
 type AuthMode = "login" | "signup";
 
 export default function AuthForm({ mode }: { mode: AuthMode }) {
-  const [theme, setTheme] = useState<Theme>("system");
-  const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window === "undefined") return "en";
-    const saved = window.localStorage.getItem("coda-language");
-    return saved === "fr" ? "fr" : "en";
-  });
+  const { language, setLanguage, theme, setTheme } = useApp();
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [password, setPassword] = useState("");
@@ -31,12 +25,7 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
   const copy = translations[language].auth;
   const isLogin = mode === "login";
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.lang = language;
-  }, [theme, language]);
-
-  const cycleTheme = () => setTheme((current) => current === "system" ? "dark" : current === "dark" ? "light" : "system");
+  const cycleTheme = () => setTheme(theme === "system" ? "dark" : theme === "dark" ? "light" : "system");
   const themeIcon = theme === "dark" ? faMoon : theme === "light" ? faSun : faDesktop;
   const passwordChecks = [
     password.length >= 8,
@@ -111,13 +100,21 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
         <Link className="wordmark" href="/" aria-label="Coda home">coda<span className="wordmark-dot">.</span></Link>
         <div className="auth-tools">
           <button className="theme-toggle" onClick={cycleTheme} aria-label={`Switch theme, currently ${theme}`} title={`Theme: ${theme}`}><FontAwesomeIcon className="theme-symbol" icon={themeIcon} aria-hidden="true" /></button>
-          <span className="language-switcher"><button className={language === "fr" ? "active-language" : ""} onClick={() => { localStorage.setItem("coda-language", "fr"); setLanguage("fr"); }}>FR</button><span>/</span><button className={language === "en" ? "active-language" : ""} onClick={() => { localStorage.setItem("coda-language", "en"); setLanguage("en"); }}>EN</button></span>
+          <span className="language-switcher">
+            <button className={language === "fr" ? "active-language" : ""} onClick={() => setLanguage("fr")}>FR</button>
+            <span>/</span>
+            <button className={language === "en" ? "active-language" : ""} onClick={() => setLanguage("en")}>EN</button>
+          </span>
         </div>
       </div>
       <section className="auth-layout">
-        <div className="auth-intro"><p className="eyebrow"><span className="eyebrow-line" /> Coda</p><h1>{isLogin ? copy.loginTitle : copy.signupTitle}</h1><p>{isLogin ? copy.loginIntro : copy.signupIntro}</p></div>
+        <div className="auth-intro">
+          <p className="eyebrow"><span className="eyebrow-line" /> Coda</p>
+          <h1>{isLogin ? copy.loginTitle : copy.signupTitle}</h1>
+          <p>{isLogin ? copy.loginIntro : copy.signupIntro}</p>
+        </div>
         <div className="auth-panel">
-          <Link className="auth-back" href="/"><FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" /> Back home</Link>
+          <Link className="auth-back" href="/"><FontAwesomeIcon icon={faArrowLeft} aria-hidden="true" /> {language === "fr" ? "Retour à l'accueil" : "Back home"}</Link>
           <h2>{isLogin ? copy.loginAction : copy.signupAction}</h2>
           {submitted ? <div className="auth-success" role="status">{copy.success}</div> : <form className="auth-form" onSubmit={handleSubmit}>
             {!isLogin && <label><span>{copy.name}</span><input name="name" type="text" autoComplete="name" required /></label>}
